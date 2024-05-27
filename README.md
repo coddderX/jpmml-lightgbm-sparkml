@@ -1,5 +1,5 @@
-jpmml-lightgbm实现了lightgbm模型转pmml <br>
-spark-ml 实现了spark ml库转pmml <br>
+jpmml-lightgbm 实现了lightgbm模型转pmml <br>
+pmml-sparkml 实现了spark ml库转pmml <br>
 这两个仓库转的pmml格式不一致，所以本项目是将统合这两个仓库，将lightgbm按照spark-ml库的方式转pmml，从而达到输出格式一致的效果 <br>
 <br>
 requires: <br>
