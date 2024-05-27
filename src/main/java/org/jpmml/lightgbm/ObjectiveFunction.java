@@ -1,0 +1,90 @@
+/*
+ * Copyright (c) 2017 Villu Ruusmann
+ *
+ * This file is part of JPMML-LightGBM
+ *
+ * JPMML-LightGBM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * JPMML-LightGBM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with JPMML-LightGBM.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.jpmml.lightgbm;
+
+import org.dmg.pmml.MiningFunction;
+import org.dmg.pmml.mining.MiningModel;
+import org.dmg.pmml.mining.Segmentation;
+import org.dmg.pmml.tree.TreeModel;
+import org.jpmml.converter.*;
+import org.jpmml.converter.mining.MiningModelUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+
+abstract
+public class ObjectiveFunction {
+
+	private String name_;
+
+	private boolean average_output_;
+
+
+	public ObjectiveFunction(Section config){
+		this.name_ = config.get(ObjectiveFunction.CONFIG_NAME);
+		this.average_output_ = config.containsKey(ObjectiveFunction.CONFIG_AVERAGE_OUTPUT);
+	}
+
+	abstract
+	public Label encodeLabel(String targetName, List<?> targetCategories, PMMLEncoder encoder);
+
+	abstract
+	public MiningModel encodeModel(List<Tree> trees, Integer numIteration, Schema schema);
+
+	protected MiningModel createMiningModel(List<Tree> trees, Integer numIteration, Schema schema){
+		ContinuousLabel continuousLabel = (ContinuousLabel)schema.getLabel();
+
+		Schema segmentSchema = schema.toAnonymousSchema();
+
+		PredicateManager predicateManager = new PredicateManager();
+
+		List<TreeModel> treeModels = new ArrayList<>();
+
+		if(numIteration != null){
+
+			if(numIteration > trees.size()){
+				throw new IllegalArgumentException("Tree limit " + numIteration + " is greater than the number of trees");
+			}
+
+			trees = trees.subList(0, numIteration);
+		}
+
+		for(Tree tree : trees){
+			TreeModel treeModel = tree.encodeTreeModel(predicateManager, segmentSchema);
+
+			treeModels.add(treeModel);
+		}
+
+		MiningModel miningModel = new MiningModel(MiningFunction.REGRESSION, ModelUtil.createMiningSchema(continuousLabel))
+			.setSegmentation(MiningModelUtil.createSegmentation(this.average_output_ ? Segmentation.MultipleModelMethod.AVERAGE : Segmentation.MultipleModelMethod.SUM, Segmentation.MissingPredictionTreatment.RETURN_MISSING, treeModels));
+
+		return miningModel;
+	}
+
+	public String getName(){
+		return this.name_;
+	}
+
+	public boolean getAverageOutput(){
+		return this.average_output_;
+	}
+
+	public static final String CONFIG_NAME = "name";
+	public static final String CONFIG_AVERAGE_OUTPUT = "average_output";
+}

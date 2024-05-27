@@ -1,0 +1,77 @@
+
+*~
+*.lock
+*.DS_Store
+*.swp
+*.out
+
+# IDE
+.metadata
+jrebel.lic
+.settings
+.classpath
+.project
+.ensime*
+*.sublime-*
+.cache
+.projectile
+*.eml
+*.iml
+*.ipr
+*.iws
+.*.sw?
+.idea
+atlassian-ide-plugin.xml
+
+#log
+*.log
+
+
+# Java template
+*.class
+
+# sbt specific
+target/
+project/boot
+lib_managed/*
+project/build/target
+project/build/lib_managed
+project/build/src_managed
+project/plugins/lib_managed
+project/plugins/target
+project/plugins/src_managed
+project/plugins/project
+.lib/
+.history
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+
+
+# Package Files #
+*.war
+*.ear
+
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+
+### Maven template
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Created by .ignore support plugin (hsz.mobi)
+/metastore_db/
+
+# Secret
+secret.md
+package.sh
