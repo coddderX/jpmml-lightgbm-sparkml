@@ -27,6 +27,7 @@ import org.jpmml.sparkml.model.HasFeatureImportances;
 import org.jpmml.sparkml.model.HasTreeOptions;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -60,6 +61,7 @@ public class LightgbmPMMLBuilder {
         Verification verification = getVerification();
 
         ConverterFactory converterFactory = new ConverterFactory(options);
+        //反射将两个lightgbm的converter塞进去
 
         LightGBMSparkMLEncoder encoder = new LightGBMSparkMLEncoder(schema, converterFactory);
 
@@ -375,6 +377,7 @@ public class LightgbmPMMLBuilder {
         return this;
     }
 
+
     static
     private Iterable<Transformer> getTransformers(PipelineModel pipelineModel) {
         List<Transformer> result = new ArrayList<>();
@@ -515,8 +518,27 @@ public class LightgbmPMMLBuilder {
         }
     }
 
+
+    static
+    private void initLightgbmConverter() {
+        try {
+            Field f = ConverterFactory.class.getDeclaredField("converters");
+            f.setAccessible(true);
+            Map<Class<? extends Transformer>, Class<? extends TransformerConverter<?>>> converters = (Map<Class<? extends Transformer>, Class<? extends TransformerConverter<?>>>) f.get(null);
+            Class<? extends Transformer> lightgbmClassifierClz = (Class<? extends Transformer>) Class.forName("com.microsoft.azure.synapse.ml.lightgbm.LightGBMClassificationModel");
+            Class<? extends Transformer> lightgbmRegressionClz = (Class<? extends Transformer>) Class.forName("com.microsoft.azure.synapse.ml.lightgbm.LightGBMRegressionModel");
+
+            converters.put(lightgbmClassifierClz, LightGBMClassificationModelConverter.class);
+            converters.put(lightgbmRegressionClz, LightGBMRegressionModelConverter.class);
+        } catch (Exception e) {
+            throw new RuntimeException("加载lightgbm pmml转换class异常");
+        }
+
+    }
+
     static {
         init();
+        initLightgbmConverter();
     }
 
 }
