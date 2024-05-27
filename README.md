@@ -7,3 +7,8 @@ synapseml-lightgbm_2.12 : 0.11.4 <br>
 pmml-sparkml : 2.2.3 <br>
 spark_2.12 : 3.2.0 <br>
 本项目是基于jpmml-lightgbm项目更改的，调整了部分实现至pmml-sparkml模式， 实现了LightGBMClassificationModel LightGBMRegressionModel分类与回归模型转Pmml<br>
+
+
+examples:<br>
+<br>
+PMML pmml = new LightgbmPMMLBuilder(structType , pipelineModel).build();
